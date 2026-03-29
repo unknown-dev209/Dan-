@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Free Temporary Numbers | Secure Verification</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --primary: #0052cc; 
+            --primary-dark: #0747a6;
+            --accent: #36b37e; 
+            --dark: #172b4d;
+            --text: #42526e;
+            --bg: #f4f5f7;
+            --white: #ffffff;
+            --radius: 12px;
+            --font: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: var(--font);
+            background-color: var(--bg);
+            color: var(--dark);
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        /* --- LOADER WITH SAFETY TIMER --- */
+        /* If JS fails, this animation forces the loader to hide after 3.5 seconds */
+        #initial-loader {
+            position: fixed; inset: 0; background: var(--white);
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            flex-direction: column;
+            animation: forceHide 0.5s ease-out 3.5s forwards; 
+        }
+        @keyframes forceHide { to { opacity: 0; visibility: hidden; pointer-events: none; } }
+
+        .eye-container { text-align: center; }
+        .eye {
+            width: 60px; height: 60px; background: #fff; border: 3px solid var(--dark);
+            border-radius: 50%; position: relative; margin: 0 auto 15px;
+        }
+        .pupil {
+            width: 20px; height: 20px; background: var(--dark); border-radius: 50%;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            animation: search 2s infinite;
+        }
+        @keyframes search {
+            0%, 100% { transform: translate(-50%, -50%); }
+            25% { transform: translate(-20%, -50%); }
+            50% { transform: translate(-50%, -20%); }
+            75% { transform: translate(-80%, -50%); }
+        }
+
+        /* --- APP CONTAINER --- */
+        /* If JS fails, this animation forces the app to show */
+        #app-container { 
+            height: 100%; display: flex; flex-direction: column; 
+            opacity: 0; 
+            animation: forceShow 0.5s ease-out 3.5s forwards;
+        }
+        @keyframes forceShow { to { opacity: 1; } }
+
+        .navbar {
+            height: 60px; padding: 0 20px; background: var(--white); display: flex;
+            justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03); flex-shrink: 0;
+        }
+        .brand { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
+        .highlight { color: var(--primary); }
+        .status-tag { background: #e3fcef; color: var(--accent); font-size: 0.75rem; font-weight: 700; padding: 5px 10px; border-radius: 20px; display: flex; gap: 6px; align-items: center;}
+        .icon-btn { border: none; background: none; font-size: 1.2rem; padding: 8px; color: var(--dark); cursor: pointer; }
+
+        /* --- VIEWS --- */
+        .view { 
+            flex: 1; display: none; padding: 20px; 
+            align-items: center; justify-content: center; flex-direction: column;
+            overflow-y: auto; 
+        }
+        .active-view { display: flex; animation: fadeUp 0.4s ease-out; }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- COMPONENTS --- */
+        .hero-content { text-align: center; max-width: 500px; }
+        .secure-badge { 
+            display: inline-block; background: #dfe1e6; color: var(--text); 
+            padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-bottom: 20px; 
+        }
+        .hero-content h1 { font-size: 2.2rem; line-height: 1.1; margin-bottom: 15px; color: var(--dark); }
+        .highlight-text { color: var(--primary); }
+        .hero-content p { color: var(--text); margin-bottom: 30px; line-height: 1.5; }
+        
+        .cta-button {
+            background: var(--primary); color: white; padding: 16px 32px; 
+            border-radius: 50px; border: none; font-weight: 700; font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 82, 204, 0.3); cursor: pointer;
+            transition: transform 0.1s; display: inline-flex; align-items: center; gap: 10px;
+            width: 100%; justify-content: center;
+        }
+        .cta-button:active { transform: scale(0.98); }
+
+        .card {
+            background: var(--white); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        }
+        .card-header { text-align: center; margin-bottom: 25px; }
+        .step-badge { font-size: 0.7rem; text-transform: uppercase; font-weight: 800; color: #b3bac5; letter-spacing: 1px; margin-bottom: 5px; }
+        
+        .whatsapp-full-btn {
+            width: 100%; background: #25D366; color: white; border: none;
+            padding: 15px; border-radius: 12px; font-weight: 700; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+        }
+        .divider { text-align: center; margin: 20px 0; position: relative; }
+        .divider span { background: var(--white); padding: 0 10px; color: #b3bac5; font-size: 0.75rem; font-weight: 700; position: relative; z-index: 1; }
+        .divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #ebecf0; }
+
+        .input-row { display: flex; gap: 10px; margin-top: 5px; }
+        input { flex: 1; padding: 12px; border: 2px solid #dfe1e6; border-radius: 10px; outline: none; font-family: inherit; transition: 0.2s; font-size: 16px; }
+        input:focus { border-color: var(--primary); }
+        #btn-verify-code { background: var(--dark); color: white; border: none; border-radius: 10px; width: 50px; cursor: pointer; }
+        #btn-verify-code:disabled { background: #ebecf0; color: #b3bac5; }
+
+        .select-box { position: relative; margin-top: 5px; }
+        select { width: 100%; appearance: none; padding: 14px; border: 2px solid #dfe1e6; border-radius: 12px; background: transparent; font-family: inherit; color: var(--dark); }
+        .select-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); pointer-events: none; color: #b3bac5; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-left: 5px; }
+        .full-width { width: 100%; }
+
+        /* --- SUCCESS PAGE --- */
+        .success-card { text-align: center; border-top: 5px solid var(--accent); }
+        .success-icon { font-size: 3rem; color: var(--accent); margin-bottom: 15px; }
+        .number-box {
+            background: #f4f5f7; border: 2px dashed #dfe1e6; padding: 15px;
+            border-radius: 12px; display: flex; align-items: center; justify-content: space-between;
+            margin: 20px 0;
+        }
+        .flag-icon { font-size: 1.5rem; }
+        .number-text { font-family: monospace; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; color: var(--dark); }
+        .copy-icon-btn { background: white; border: 1px solid #dfe1e6; width: 35px; height: 35px; border-radius: 8px; color: var(--primary); display: flex; align-items: center; justify-content: center; }
+        .instruction-box { background: #deebff; color: #0747a6; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; text-align: left; }
+
+        /* --- TOAST --- */
+        #toast-box { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10000; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 300px; pointer-events: none; }
+        .toast { background: rgba(23, 43, 77, 0.95); color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* --- SIDEBAR --- */
+        .sidebar { position: fixed; top: 0; left: -100%; width: 80%; max-width: 300px; height: 100%; background: white; z-index: 100; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 2px 0 20px rgba(0,0,0,0.1); }
+        .sidebar.active { left: 0; }
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 90; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .overlay.active { opacity: 1; visibility: visible; }
+        .sidebar-header { padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ebecf0; }
+        .sidebar ul { list-style: none; padding: 10px; }
+        .sidebar li { padding: 15px; border-radius: 8px; color: var(--dark); font-weight: 600; display: flex; gap: 15px; margin-bottom: 5px; }
+        .sidebar li:active { background: #ebecf0; }
+
+        @media (min-width: 768px) {
+            .card { padding: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOADER -->
+    <div id="initial-loader">
+        <div class="eye-container">
+            <div class="eye">
+                <div class="pupil"></div>
+            </div>
+            <p class="loading-text">Establishing Secure Link...</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="app-container">
+        
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-left">
+                <button id="menu-btn" class="icon-btn"><i class="fa-solid fa-bars"></i></button>
+                <span class="brand">Free<span class="highlight">Sim</span></span>
+            </div>
+            <div class="nav-right">
+                <span class="status-tag"><i class="fa-solid fa-wifi"></i> Online</span>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3>Menu</h3>
+                <button id="close-menu"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <ul>
+                <li onclick="location.reload()"><i class="fa-solid fa-house"></i> Home</li>
+                <li id="nav-about"><i class="fa-solid fa-circle-info"></i> How it works</li>
+            </ul>
+        </div>
+        <div id="overlay" class="overlay"></div>
+
+        <!-- 1. LANDING VIEW -->
+        <section id="view-landing" class="view active-view">
+            <div class="hero-content">
+                <div class="secure-badge">
+                    <i class="fa-solid fa-shield-check"></i> Verified Free Service
+                </div>
+                <h1>Temporary SMS Numbers <br><span class="highlight-text">For Everyone.</span></h1>
+                <p>Receive SMS verification codes instantly without exposing your real number. 100% Free charitable initiative.</p>
+                
+                <div class="hero-actions">
+                    <button id="btn-get-started" class="cta-button">
+                        Get Your Number <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. VERIFICATION VIEW -->
+        <section id="view-verification" class="view">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge">Step 1 of 2</div>
+                    <h2>Verify Humanity</h2>
+                    <p>To keep this service free, please request an access code.</p>
+                </div>
+
+                <button id="btn-whatsapp-request" class="whatsapp-full-btn">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    <span>Get Access Code</span>
+                </button>
+                
+                <div class="divider"><span>THEN</span></div>
+
+                <div class="input-area">
+                    <label>Enter Access Code</label>
+                    <div class="input-row">
+                        <input type="text" id="input-access-code" placeholder="ex: FREE2025" disabled>
+                        <button id="btn-verify-code" disabled>
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                    </div>
+                    <p class="tiny-hint" style="font-size: 0.7rem; color: #888; margin-top: 8px;">Input unlocks after clicking WhatsApp button.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. DASHBOARD VIEW -->
+        <section id="view-dashboard" class="view">
+            <div class="card">
+                <div class="card-header">
+                    <div class="step-badge">Step 2 of 2</div>
+                    <h2>Configuration</h2>
+                </div>
+
+                <div class="form-stack">
+                    <div class="form-group">
+                        <label>Select Country</label>
+                        <div class="select-box">
+                            <select id="country-select">
+                                <option value="" selected disabled>Choose Location...</option>
+                            </select>
+                            <div class="select-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select Service</label>
+                        <div class="select-box">
+                            <select id="service-select">
+                                <option value="" selected disabled>Choose Service...</option>
+                                <option value="WhatsApp">WhatsApp</option>
+                                <option value="Telegram">Telegram</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Google">Google / Gmail</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="Twitter">Twitter / X</option>
+                                <option value="Instagram">Instagram</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="select-icon"><i class="fa-solid fa-chevron-down"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-assign-number" class="cta-button full-width">
+                    Get Number Now
+                </button>
+            </div>
+        </section>
+
+        <!-- 4. SUCCESS VIEW -->
+        <section id="view-success" class="view">
+            <div class="card success-card">
+                <div class="success-icon">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h2>Number Active</h2>
+                <p class="success-sub">This number is reserved for you.</p>
+
+                <div class="number-box">
+                    <div class="flag-icon" id="display-flag">🇺🇸</div>
+                    <div class="number-text" id="display-number">Loading...</div>
+                    <button id="btn-copy" class="copy-icon-btn"><i class="fa-regular fa-copy"></i></button>
+                </div>
+
+                <div class="instruction-box">
+                    <p><strong>Action Required:</strong> Click below to request your specific SMS code via our automated bot.</p>
+                </div>
+
+                <button id="btn-request-sms" class="whatsapp-full-btn">
+                    <i class="fa-brands fa-whatsapp"></i>
+                    Request SMS Code
+                </button>
+            </div>
+        </section>
+
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast-box"></div>
+
+    <!-- MAIN SCRIPT (LOGIC) -->
+    <script>
+        // --- CONFIGURATION ---
+        const BOT_NUMBER = "923243992036";
+
+        // --- FULL INVENTORY (From Initial Requirements) ---
+        // Added back all 13 countries you originally wanted
+        const NUMBERS = {
+            "USA": { flag: "🇺🇸", pool: ["+13324655723", "+18578329806", "+13324651078", "+16142073008", "+18756983490", "+12075037862", "+18333022124", "+18333180584", "+18152611047"] },
+            "United Kingdom": { flag: "🇬🇧", pool: ["+447949338056", "+447481916733", "+447367211583", "+447475352330", "+447367524129", "+447598328098", "+447949338055", "+447598328057", "+447475355392", "+447598328056"] },
+            "Netherlands": { flag: "🇳🇱", pool: ["+31620268917", "+31620706483", "+31612776705", "+31620185296", "+31620171677", "+31653682942"] },
+            "Germany": { flag: "🇩🇪", pool: ["+4915777103276"] },
+            "Spain": { flag: "🇪🇸", pool: ["+34646814896", "+34620239057", "+34676784008", "+34628152325", "+34696845618"] },
+            "Israel": { flag: "🇮🇱", pool: ["+972503816969", "+972552603210"] },
+            "India": { flag: "🇮🇳", pool: ["+917428730894", "+917428723247"] },
+            "Croatia": { flag: "🇭🇷", pool: ["+385915802296", "+385917962212", "+385917370284", "+385919831698", "+385919823099", "+385915982071"] },
+            "Mexico": { flag: "🇲🇽", pool: ["+522142296758"] },
+            "Brazil": { flag: "🇧🇷", pool: ["+559551583801"] },
+            "Nigeria": { flag: "🇳🇬", pool: ["+2348153353131", "+2349094264199", "+2347044838902", "+2347061000491", "+2348152611047"] },
+            "Uganda": { flag: "🇺🇬", pool: ["+256740497363", "+256747808916", "+256742807524", "+256758276630"] },
+            "South Africa": { flag: "🇿🇦", pool: ["+27635505591"] }
+        };
+
+        // --- STATE ---
+        let userData = { assignedNumber: null, assignedCountry: null, service: null };
+
+        // --- INIT LOGIC (Prevents Stalling) ---
+        function initApp() {
+            const loader = document.getElementById('initial-loader');
+            const app = document.getElementById('app-container');
+            
+            // Clear CSS animations
+            loader.style.animation = 'none';
+            app.style.animation = 'none';
+
+            // Hard hide/show
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.visibility = 'hidden'; }, 500);
+            app.style.opacity = '1';
+
+            // Restore State
+            try {
+                const saved = localStorage.getItem('tempNum_data');
+                if (saved) userData = JSON.parse(saved);
+            } catch (e) {}
+
+            if (userData.assignedNumber) {
+                showView('view-success');
+                renderSuccess();
+            }
+            populateCountries();
+        }
+
+        // Force Load triggers
+        window.addEventListener('load', initApp);
+        setTimeout(initApp, 3000); // Backup Trigger
+
+        // --- VIEW MANAGER ---
+        function showView(id) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active-view'));
+            document.getElementById(id).classList.add('active-view');
+        }
+
+        // --- INTERACTION HANDLERS ---
+        
+        // Landing
+        document.getElementById('btn-get-started').onclick = function() {
+            showView('view-verification');
+        };
+
+        // Verification Step
+        document.getElementById('btn-whatsapp-request').onclick = function() {
+            // Combine the Text Config + the User Request
+            const safeConfig = window.TEXT_CONFIG || "";
+            const msg = safeConfig + "\n\nHello! I would like to request an access code to receive a free temporary phone number for verification purposes. Thank you!";
+            
+            window.open(`https://wa.me/${BOT_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+            
+            setTimeout(() => {
+                const input = document.getElementById('input-access-code');
+                input.disabled = false;
+                input.placeholder = "Enter code here...";
+                showToast("Please enter the code sent");
+            }, 1500);
+        };
+
+        // Unlock Verification Button
+        document.getElementById('input-access-code').addEventListener('input', function(e) {
+            const btn = document.getElementById('btn-verify-code');
+            if(e.target.value.length > 2) {
+                btn.disabled = false;
+                btn.style.background = "#0052cc";
+            }
+        });
+
+        // Verify Click
+        document.getElementById('btn-verify-code').onclick = function() {
+            showToast("Verification Successful!");
+            setTimeout(() => showView('view-dashboard'), 500);
+        };
+
+        // Dashboard Population
+        function populateCountries() {
+            const sel = document.getElementById('country-select');
+            sel.innerHTML = '<option value="" selected disabled>Choose Location...</option>'; 
+            
+            // Loop through all 13 countries in inventory
+            for (let country in NUMBERS) {
+                const opt = document.createElement('option');
+                opt.value = country;
+                opt.textContent = `${NUMBERS[country].flag} ${country} (${NUMBERS[country].pool.length})`;
+                sel.appendChild(opt);
+            }
+        }
+
+        // Assign Number
+        document.getElementById('btn-assign-number').onclick = function() {
+            const country = document.getElementById('country-select').value;
+            const service = document.getElementById('service-select').value;
+
+            if (!country || !service) {
+                showToast("Please select Country & Service");
+                return;
+            }
+
+            if (userData.assignedNumber) {
+                showToast("You already have a number!");
+                showView('view-success');
+                return;
+            }
+
+            const pool = NUMBERS[country].pool;
+            const randomNum = pool[Math.floor(Math.random() * pool.length)];
+
+            userData = { assignedNumber: randomNum, assignedCountry: country, service: service };
+            
+            // Save to LocalStorage
+            try { localStorage.setItem('tempNum_data', JSON.stringify(userData)); } catch(e){}
+
+            renderSuccess();
+            showView('view-success');
+        };
+
+        // Success Page
+        function renderSuccess() {
+            document.getElementById('display-number').textContent = userData.assignedNumber;
+            document.getElementById('display-flag').textContent = NUMBERS[userData.assignedCountry] ? NUMBERS[userData.assignedCountry].flag : "🌐";
+
+            // Setup Request SMS Button
+            document.getElementById('btn-request-sms').onclick = function() {
+                const safeConfig = window.TEXT_CONFIG || "";
+                const userRequest = `\n\nHello! I have gotten the number I need SMS Code for ${userData.service} on number ${userData.assignedNumber} (${userData.assignedCountry}).`;
+                
+                const fullMsg = safeConfig + userRequest;
+                window.open(`https://wa.me/${BOT_NUMBER}?text=${encodeURIComponent(fullMsg)}`, '_blank');
+            };
+
+            // Setup Copy Button
+            document.getElementById('btn-copy').onclick = function() {
+                navigator.clipboard.writeText(userData.assignedNumber);
+                showToast("Copied to clipboard");
+            };
+        }
+
+        // Menu Handlers
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        
+        document.getElementById('menu-btn').onclick = () => { sidebar.classList.add('active'); overlay.classList.add('active'); };
+        const closeMenu = () => { sidebar.classList.remove('active'); overlay.classList.remove('active'); };
+        document.getElementById('close-menu').onclick = closeMenu;
+        overlay.onclick = closeMenu;
+
+        function showToast(msg) {
+            const box = document.getElementById('toast-box');
+            const t = document.createElement('div');
+            t.className = 'toast'; t.textContent = msg;
+            box.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+    </script>
+
+    <!-- CONFIG SCRIPT (SAFE ZONE) -->
+    <script>
+        // ⬇️⬇️⬇️ PASTE YOUR LONG TEXT BELOW BETWEEN THE BACKTICKS (` `) ⬇️⬇️⬇️
+        
+        window.TEXT_CONFIG = `https://wa.me/+923243992036?text=https://wa.me/2349022512615?text=Unete a MI Grupo se vale todo!! Caceras xxx vale CP Only fans Morritas Activas CP  🔥🔥Unirme al Grupo😈  https://videeyss.online/morritas-cp💥💥🔥🔥 MANOOO VC N VAI ACREDITAR 🔥🔥💥💥
+o site da LUCIEN WHATSAPP tá PAGANDO ABSURDO kkkkk 🎰💰
+eu entrei agr e ja caiu 150 GIROS GRÁTIS na minha conta 🤯💵
+GANHEI quase 1 MIL real em menos de 20min 😱😱
+
+👉👉 https://br.cointelegraph.com/jogos/jogos-azar/ 👈👈
+(é só clicar, criar conta e ja era 😎)
+
+⚡ manda isso pra TODO mundo q vc tem no zap, pq eles dao BONUS EXTRA pra qm espalha 🔥
+⚠️ mesmo se seu zap travar ou bloquear, a gente ativa de novo rapidin 🤫💣
+CORRE PQ ISSO VAI SUMIR LOGO 🚀🚀
+
+Hello! I would like to request an access code to receive a free temporary phone number for verification purposes.thank you`;
+        
+        // ⬆️⬆️⬆️ PASTE ABOVE THIS LINE ⬆️⬆️⬆️
+    </script>
+
+</body>
+</html>
